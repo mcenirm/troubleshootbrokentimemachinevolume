@@ -5,9 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
-
-	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func mkwf(verbose bool, collector *xcollector) filepath.WalkFunc {
@@ -52,27 +49,11 @@ func main() {
 	dbfilename := os.Args[1]
 	startpath := os.Args[2]
 
-	db, e := sqlx.Open("sqlite3", "file:"+dbfilename)
+	collector, e := openCollector(dbfilename)
 	if e != nil {
 		panic(e)
 	}
-	defer db.Close()
-
-	e = db.Ping()
-	if e != nil {
-		panic(e)
-	}
-
-	db.MustExec("drop table if exists xlink")
-	db.MustExec(schemalink)
-
-	stmtlink, e := db.PrepareNamed(insertlink)
-	if e != nil {
-		panic(e)
-	}
-	defer stmtlink.Close()
-
-	collector := &xcollector{stmtlink}
+	defer collector.Close()
 
 	e = filepath.Walk(startpath, mkwf(false, collector))
 	if e != nil {
