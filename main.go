@@ -10,10 +10,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type xcollector struct {
-	stmt *sqlx.NamedStmt
-}
-
 func mkwf(verbose bool, collector *xcollector) filepath.WalkFunc {
 	startpathIsSet := false
 	startpath := ""
