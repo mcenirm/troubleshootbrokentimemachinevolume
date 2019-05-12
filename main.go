@@ -40,7 +40,7 @@ func mkwf(verbose bool, collector *xcollector) filepath.WalkFunc {
 			fmt.Fprintf(os.Stderr, "%x %8x %6o %9d %q %q\n", link.Dev, link.Ino, link.Mod, link.Siz, link.Dir, link.Nam)
 		}
 
-		collector.stmt.MustExec(&link)
+		collector.collect(&link)
 
 		return nil
 	}
