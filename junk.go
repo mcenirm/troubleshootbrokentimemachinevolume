@@ -104,6 +104,7 @@ func main() {
 		panic(e)
 	}
 
+	db.MustExec("drop table if exists xlink")
 	db.MustExec(schemalink)
 
 	stmtlink, e := db.PrepareNamed(insertlink)
