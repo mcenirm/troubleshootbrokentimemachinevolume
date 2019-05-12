@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"syscall"
@@ -51,7 +50,6 @@ type xlink struct {
 func mkwf(stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
 	startpathIsSet := false
 	startpath := ""
-	counter := 0
 
 	return func(path string, info os.FileInfo, err error) error {
 		if !startpathIsSet {
@@ -79,10 +77,6 @@ func mkwf(stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
 
 		stmtlink.MustExec(&link)
 
-		counter++
-		if counter > 10 {
-			return io.EOF
-		}
 		return nil
 	}
 }
@@ -114,9 +108,6 @@ func main() {
 	defer stmtlink.Close()
 
 	e = filepath.Walk(startpath, mkwf(stmtlink))
-	if e == io.EOF {
-		return
-	}
 	if e != nil {
 		panic(e)
 	}
