@@ -39,13 +39,13 @@ const (
 		)`
 )
 
-type xlink struct {
-	dir string
-	nam string
-	dev int32
-	ino uint64
-	siz int64
-	mod uint16
+type Xlink struct {
+	Dir string `db:"dir"`
+	Nam string
+	Dev int32
+	Ino uint64
+	Siz int64
+	Mod uint16
 }
 
 func mkwf(stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
@@ -67,17 +67,18 @@ func mkwf(stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
 
 		nam := info.Name()
 		st := info.Sys().(*syscall.Stat_t)
-		left := len(startpath) + 1
+		left := len(startpath)
 		right := len(path) - len(nam) - 1
 		dir := ""
 		if left < right {
 			dir = path[left:right]
 		}
-		link := xlink{dir, nam, st.Dev, st.Ino, st.Size, st.Mode}
+		link := Xlink{dir, nam, st.Dev, st.Ino, st.Size, st.Mode}
+
+		fmt.Fprintf(os.Stderr, "%x %8x %6o %9d %q %q\n", link.Dev, link.Ino, link.Mod, link.Siz, link.Dir, link.Nam)
 
 		stmtlink.MustExec(&link)
 
-		fmt.Fprintf(os.Stderr, "%x %8x %6o %9d %q %q\n", link.dev, link.ino, link.mod, link.siz, link.dir, link.nam)
 		counter++
 		if counter > 10 {
 			return io.EOF
@@ -105,10 +106,7 @@ func main() {
 
 	db.MustExec(schemalink)
 
-	tx := db.MustBegin()
-	defer tx.Commit()
-
-	stmtlink, e := tx.PrepareNamed(insertlink)
+	stmtlink, e := db.PrepareNamed(insertlink)
 	if e != nil {
 		panic(e)
 	}
