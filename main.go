@@ -10,7 +10,11 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func mkwf(verbose bool, stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
+type xcollector struct {
+	stmt *sqlx.NamedStmt
+}
+
+func mkwf(verbose bool, collector *xcollector) filepath.WalkFunc {
 	startpathIsSet := false
 	startpath := ""
 
@@ -40,7 +44,7 @@ func mkwf(verbose bool, stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
 			fmt.Fprintf(os.Stderr, "%x %8x %6o %9d %q %q\n", link.Dev, link.Ino, link.Mod, link.Siz, link.Dir, link.Nam)
 		}
 
-		stmtlink.MustExec(&link)
+		collector.stmt.MustExec(&link)
 
 		return nil
 	}
@@ -72,7 +76,9 @@ func main() {
 	}
 	defer stmtlink.Close()
 
-	e = filepath.Walk(startpath, mkwf(false, stmtlink))
+	collector := &xcollector{stmtlink}
+
+	e = filepath.Walk(startpath, mkwf(false, collector))
 	if e != nil {
 		panic(e)
 	}
