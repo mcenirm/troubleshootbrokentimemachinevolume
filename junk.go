@@ -39,7 +39,7 @@ const (
 		)`
 )
 
-type Xlink struct {
+type xlink struct {
 	Dir string `db:"dir"`
 	Nam string
 	Dev int32
@@ -73,7 +73,7 @@ func mkwf(stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
 		if left < right {
 			dir = path[left:right]
 		}
-		link := Xlink{dir, nam, st.Dev, st.Ino, st.Size, st.Mode}
+		link := xlink{dir, nam, st.Dev, st.Ino, st.Size, st.Mode}
 
 		fmt.Fprintf(os.Stderr, "%x %8x %6o %9d %q %q\n", link.Dev, link.Ino, link.Mod, link.Siz, link.Dir, link.Nam)
 
