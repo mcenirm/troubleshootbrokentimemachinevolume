@@ -109,7 +109,7 @@ func main() {
 	}
 	defer stmtlink.Close()
 
-	e = filepath.Walk(startpath, mkwf(true, stmtlink))
+	e = filepath.Walk(startpath, mkwf(false, stmtlink))
 	if e != nil {
 		panic(e)
 	}
