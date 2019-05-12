@@ -47,7 +47,7 @@ type xlink struct {
 	Mod uint16
 }
 
-func mkwf(stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
+func mkwf(verbose bool, stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
 	startpathIsSet := false
 	startpath := ""
 
@@ -73,7 +73,9 @@ func mkwf(stmtlink *sqlx.NamedStmt) filepath.WalkFunc {
 		}
 		link := xlink{dir, nam, st.Dev, st.Ino, st.Size, st.Mode}
 
-		fmt.Fprintf(os.Stderr, "%x %8x %6o %9d %q %q\n", link.Dev, link.Ino, link.Mod, link.Siz, link.Dir, link.Nam)
+		if verbose {
+			fmt.Fprintf(os.Stderr, "%x %8x %6o %9d %q %q\n", link.Dev, link.Ino, link.Mod, link.Siz, link.Dir, link.Nam)
+		}
 
 		stmtlink.MustExec(&link)
 
@@ -107,7 +109,7 @@ func main() {
 	}
 	defer stmtlink.Close()
 
-	e = filepath.Walk(startpath, mkwf(stmtlink))
+	e = filepath.Walk(startpath, mkwf(true, stmtlink))
 	if e != nil {
 		panic(e)
 	}
